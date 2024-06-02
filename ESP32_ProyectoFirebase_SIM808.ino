@@ -363,7 +363,7 @@ if(SIM808.available()){
 
     // Verifica si el mensaje contiene el texto "datos"
     if (sms.indexOf("datos") != -1) {
-      enviarSMS("Respuesta de SIM808: ",temperature2,humidity,pressure,quality,hora);
+      enviarSMS("Respuesta de SIM808: ",temperature2,humidity,pressure,quality,altitude,hora);
     }
   }
   else if (has_expired2 && Firebase.ready()){
@@ -393,18 +393,20 @@ if(SIM808.available()){
   }
   checkWiFiConnection();
 }
-void enviarSMS(String texto, float temp1, float humi, float presi, float quali, String horas) {
+void enviarSMS(String texto, float temp1, float humi, float presi, float quali, float alti, String horas) {
     // Convertir float a String
   String tempStr = String(temp1, 2); // 2 es el número de decimales
   String humedadStr = String(humi, 2);
   String presiStr = String(presi, 2); // 2 es el número de decimales
   String qualiStr = String(quali, 2); // 2 es el número de decimales
+  String altiStr = String(alti, 2); // 2 es el número de decimales
   String horasStr = horas;
   // Concatenar las variables al texto
   texto += " Temperatura: " + tempStr + "*C -";
   texto += " Humedad: " + humedadStr + "% -";
-  texto += " Presión: " + presiStr + "hPa -";
+  texto += " Presion: " + presiStr + "hPa -";
   texto += " PPM CO2: " + qualiStr + "PPM -";
+  texto += " Altitud: " + altiStr + "msnm -";
   texto += " Hora: " + horasStr;
 
   SIM808.println("AT+CMGF=1");    // Configura el SIM808 para enviar SMS en formato texto
