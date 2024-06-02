@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Dashboard para monitoreo de variables ambientales con ESP32 y Real Time Database">
+    <meta name="keywords" content="ESP32, Arduino, Firebase">
+    <meta name="author" content="Camilo Catachunga Lugo">
+    <title>DASHBOARD ESP32</title>
+
+    <!-- update the version number as needed -->
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+
+    <!-- include only the Firebase features as you need -->
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.7/all/gauge.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.4/raphael-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.3.5/justgage.min.js"></script>
+
+    <script>
+     // REPLACE WITH YOUR web app's Firebase configuration
+     const firebaseConfig = {
+      apiKey: "AIzaSyA3VLtTrmpkoYrcS_G1-1wdqLcIQrfJJ8U",
+      authDomain: "iot-proycomunicaciones.firebaseapp.com",
+      databaseURL: "https://iot-proycomunicaciones-default-rtdb.firebaseio.com",
+      projectId: "iot-proycomunicaciones",
+      storageBucket: "iot-proycomunicaciones.appspot.com",
+      messagingSenderId: "953351482165",
+      appId: "1:953351482165:web:8f6a0ebe46e60f31a27a7c",
+      measurementId: "G-72VG5X2CDW"
+      };
+
+      // Initialize firebase
+      firebase.initializeApp(firebaseConfig);
+      
+      // Make auth and database references
+      const auth = firebase.auth();
+      const db = firebase.database();
+
+    </script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<a title="UNIAJC" href="https://www.uniajc.edu.co/"target="_blank"><img src="logoUNIAJC.png" alt="LOGO logoUNIAJC" /></a>
+ <body background="fondo6.jpg">
+
+
+<body>
+  <!--TOP BAR-->
+ 
+  <div class="topnav">
+    <!--<h1>MONITOR DE VARIABLES <i class="fas fa-clipboard-list"></i></h1> -->
+    <h1 style="font-size: x-large;">MONITOR DE VARIABLES AMBIENTALES <i class="fas fa-clipboard-list"></i></h1>
+    <p style="font-size: smaller;">Último reporte: <span id="report"></span></p>
+    <p style="font-size: smaller;">Voltaje Batería: <span id="volt"></span> V</p>
+  </div>
+  <br>
+  <!--LOGIN FORM-->
+  <form id="login-form" style="display: none;">
+    <div class="form-elements-container">
+      <label for="input-email"><b>Email</b></label>
+      <input type="text" placeholder="Enter Username" id="input-email" required>
+
+      <label for="input-password"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" id="input-password" required>
+
+      <button type="submit" id="login-button">Login</button>
+      <p id="error-message" style="color:red;"></p>
+    </div>
+  </form>
+
+  <!--CONTENT (SENSOR READINGS)-->
+  <div class="content-sign-in" id="content-sign-in">
+    
+    <div class="cards">
+       <!--LED   <div class="card card-switch\"><h4><i class="fas fa-lightbulb\"></i>ENVIAR ESTADO</h4><label class="switch"><input type="checkbox" onchange="toggleLed(this);" id="led"><span class="slider"></span></label></div>            
+       -->
+      <!--MANOMETRO TEMPERATURE-->
+      <div class="card">
+        <p><i class="fas fa-thermometer-half" style="color:#e72b3b;"></i> TEMPERATURA</p>
+        <div id="gauge-temp"class="gauge"></div>
+      </div>
+      <!--MANOMETRO PRESION-->
+      <div class="card">
+        <p><i class="fas fa-rocket" style="color:#e47637;"></i> PRESIÓN</p>
+        <div id="gauge-press"class="gauge"></div>
+      </div>
+      <!--MANOMETRO HUMEDAD-->
+      <div class="card">
+        <p><i class="fas fa-tint" style="color:#00add6;"></i> HUMEDAD</p>
+        <div id="gauge-hum"class="gauge"></div>
+      </div>
+
+      <!--QUALITY-->
+      <div class="card">
+        <p><i class="fas fa-wind" style="color:#21e7dd;"></i> CALIDAD DE AIRE</p>
+        <small>Nivel de CO2:</small>
+        <p><span class="reading"><span id="quality"></span> PPM</span></p>
+      </div>
+
+      <!--ALTITUDE-->
+      <div class="card">
+        <p><i class="fas fa-water" style="color:#37d8e4;"></i> ALTITUD</p>
+        <small>Santiago de Cali:</small>
+        <p><span class="reading"><span id="alt"></span> m.s.n.m</span></p>
+      </div>
+      <!--CONSOLIDADO-->
+      <div class="card">
+          <p><i class="fas fa-clipboard-list" style="color:#1b1e1f;"></i> CONSOLIDADO</p>
+          <p class="temperature-text">Temperatura: <span class="reading2"><span id="temp"></span></span></p>
+          <p class="temperature-text">Humedad: <span class="reading2"><span id="hum"></span></span></p>
+          <p class="temperature-text">Presion: <span class="reading2"><span id="pres"></span></span></p>
+      </div>
+        
+    </div>
+    <br>
+    <!--CHARTS-->
+  <!--  <div id="charts-div" style="display:none"> -->
+  <div id="charts-div" >
+      <!--TEMPERATURE-CHART-->
+      <div class="cards">
+        <div class="card">
+          <p><i class="fas fa-thermometer-half" style="color:#059e8a;"></i> TEMPERATURA AMBIENTE</p>
+          <div id="chart-temperature" class="chart-container"></div>
+        </div>
+      </div>
+      <br>
+      <!--HUMIDITY-CHART-->
+      <div class="cards">
+        <div class="card">
+          <p><i class="fas fa-tint" style="color:#059e8a;"></i> HUMEDAD RELATIVA</p>
+          <!--div id="chart-altitude" class="chart-container"></div-->
+          <div id="chartHumidity" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <!--AUTHENTICATION BAR (USER DETAILS/LOGOUT BUTTON)-->
+    <div id="authentication-bar" style="display: none;">
+      <p><span id="authentication-status">Usuario Logged</span>
+         <span id="user-details">USEREMAIL</span>
+         <a href="/" id="logout-link">(logout)</a>
+      </p>
+    </div>
+  
+
+  <script src="scripts/index.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/charts-definitions.js"></script>
+  </body>
+</html>
