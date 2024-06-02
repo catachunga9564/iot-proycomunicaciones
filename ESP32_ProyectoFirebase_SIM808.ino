@@ -411,7 +411,7 @@ void enviarSMS(String texto, float temp1, float humi, float presi, float quali, 
 
   SIM808.println("AT+CMGF=1");    // Configura el SIM808 para enviar SMS en formato texto
   delay(500);
-  SIM808.println("AT+CMGS=\"+573158603702\""); // Reemplaza con el número de teléfono destino
+  SIM808.println("AT+CMGS=\"+573158603702\""); // 
   delay(500);
   SIM808.print(texto);
   delay(100);
